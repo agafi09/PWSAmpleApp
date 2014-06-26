@@ -6,6 +6,11 @@ import java.util.GregorianCalendar;
 
 public class DateConverter {
 	
+	private static final int TWELVE = 12;
+	private static final int ZERO = 0;
+	/**
+	 * Method that returns the custom formatted Schedule
+	 */
 	public static String getScheduleDateFormat(Date stratDate, Date endDate){
 		
 		String formatedSchedule = "";
@@ -33,23 +38,28 @@ public class DateConverter {
 		return formatedSchedule;
 	}
 	
+	/**
+	 * Method returns the custom formatted hour
+	 */
 	private static String getMeridiemFormat(int rawHour){
 		String formatedHour = "";
 		
-		if (rawHour == 0) 
+		if (rawHour == ZERO) 
 			formatedHour =  "12:00 am";  
-		else if (rawHour == 12) 
+		else if (rawHour == TWELVE) 
 			formatedHour = "12:00 pm";
-			else if (rawHour < 12) 
+			else if (rawHour < TWELVE) 
 				formatedHour = rawHour + " am";
 				else
 					// convert to 12 format
-					formatedHour = rawHour-12 +" pm";
+					formatedHour = rawHour-TWELVE +" pm";
 
 		return formatedHour;
-		
 	}
 	
+	/**
+	 * Method returns the names of the days of the week
+	 */
 	private static String getDayOfTheWeek(int dayOfWeek){
 		
 		String formatedDayofTheWeak = "";

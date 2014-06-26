@@ -1,25 +1,28 @@
 package com.applaudo.phunwaresampleapp.entitylayer;
 
-import java.io.Serializable;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+/**
+ * Wrapper class for the downloaded information
+ */
+public class ServiceActionResult {
 
-public class ServiceActionResult implements Parcelable {
-
-	
-	public final int SERVICE_CODE_SUCCESS = 1;
-	public final int SERVICE_CODE_RECORDSFOUND = 2;
-	public final int SERVICE_CODE_NORECORDSFOUND = 3;
-	public final int SERVICE_CODE_ERROR = 4;
-	public final int SERVICE_CODE_WARNING = 5;
-	public final int SERVICE_CODE_FAILURE = 6;
-	public final int SERVICE_CODE_USERNOTFOUND = 7;
-	public final int SERVICE_CODE_SESSIONEXPIRED = 12;
+	/**
+	 * Empty constructor required for the creation of a new instance of the wrapper object
+	 */
+	public enum ServiceActionResultCode {
+		SERVICE_CODE_SUCCESS, 
+		SERVICE_CODE_RECORDSFOUND, 
+		SERVICE_CODE_NORECORDSFOUND, 
+		SERVICE_CODE_ERROR,
+		SERVICE_CODE_WARNING, 
+		SERVICE_CODE_FAILURE, 
+		SERVICE_CODE_USERNOTFOUND,
+		SERVICE_CODE_SESSIONEXPIRED
+	}
 
 	private Object result;
 	private String message;
-	private int returnCode;
+	private ServiceActionResultCode returnCode;
 	private int count;
 
 	public int getCount() {
@@ -46,48 +49,19 @@ public class ServiceActionResult implements Parcelable {
 		this.message = message;
 	}
 
-	public int getReturnCode() {
+	public ServiceActionResultCode getReturnCode() {
 		return returnCode;
 	}
 
-	public void setReturnCode(int returnCode) {
-		this.returnCode = returnCode;
+	public void setReturnCode(ServiceActionResultCode serviceCodeSuccess) {
+		this.returnCode = serviceCodeSuccess;
 	}
 
-	@Override
-	public int describeContents() {
-		return 0;
-	}
-
-	@Override
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeInt(count);
-		dest.writeString(message);
-		dest.writeInt(returnCode);
-		dest.writeSerializable( (Serializable) (result));
-	}
-
-	public ServiceActionResult(Parcel in) {
-		this.count = in.readInt();
-		this.message = in.readString();
-		this.returnCode = in.readInt();
-		this.result = in.readSerializable();
-	}
-
+	/**
+	 * Empty constructor required for the creation of a new instance of the wrapper object
+	 */
 	public ServiceActionResult() {
-
+		
 	}
-
-	@SuppressWarnings("rawtypes")
-	public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-		public ServiceActionResult createFromParcel(Parcel in) {
-			return new ServiceActionResult(in);
-		}
-
-		public ServiceActionResult[] newArray(int size) {
-			return new ServiceActionResult[size];
-		}
-	};
-
 	
 }

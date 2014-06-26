@@ -26,12 +26,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class VenueDetailFragment extends Fragment{
+	
 	private final static String VENUE_IMAGE = "venue_image";
 	private final static String CURRENT_VENUE = "venus_list";
+	
 	private Venue mCurrentVenue = null;
 	private Context context;
-	private Bitmap mVenue_Image = null;
-	private Boolean mViewRotated = false; 
+	private Bitmap mVenueImage = null;
+	private Boolean isViewRotated = false; 
 
 	private ShareActionProvider mShareActionProvider;
 	
@@ -40,12 +42,12 @@ public class VenueDetailFragment extends Fragment{
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		if (savedInstanceState != null) {
-			mViewRotated = true;
-			mVenue_Image = savedInstanceState.getParcelable(VENUE_IMAGE);
+			isViewRotated = true;
+			mVenueImage = savedInstanceState.getParcelable(VENUE_IMAGE);
 			mCurrentVenue = savedInstanceState.getParcelable(CURRENT_VENUE);
 			
 		}else{
-			mViewRotated = false;
+			isViewRotated = false;
 		}
 		setHasOptionsMenu(true);
 		return inflater.inflate(R.layout.fragment_venue_detail_view, container, false);
@@ -54,8 +56,8 @@ public class VenueDetailFragment extends Fragment{
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		if (mVenue_Image != null)
-			outState.putParcelable(VENUE_IMAGE, mVenue_Image);
+		if (mVenueImage != null)
+			outState.putParcelable(VENUE_IMAGE, mVenueImage);
 
 		if (mCurrentVenue != null)
 			outState.putParcelable(CURRENT_VENUE, mCurrentVenue);
@@ -70,7 +72,7 @@ public class VenueDetailFragment extends Fragment{
 	@Override
 	public void onStart() {
 		super.onStart();	
-		if (mViewRotated) {
+		if (isViewRotated) {
 			updateVenueDetailFromRestore();
 		} else  
 			updateVenueView();		
@@ -101,16 +103,24 @@ public class VenueDetailFragment extends Fragment{
 			shareVenue("");	
 		}
 	}
-
+	
+	/**
+	 * Sets the current venue selected 
+	 */
 	public void updateVenue(Venue newVenue) {
 		mCurrentVenue = newVenue;
 	}
-
+	/**
+	 * Checks if a current venue exists and calls the method that updates the UI
+	 */
 	public void updateVenueView() {
 		if (mCurrentVenue != null)
 			updateVenueDetail(mCurrentVenue);
 	}
-
+	
+	/**
+	 * Method that updates the UI with the venue information that was saved onSaveInstanceState method
+	 */
 	public void updateVenueDetailFromRestore() {
 		if(mCurrentVenue != null) {
 			Venue venueObj = mCurrentVenue;
@@ -120,22 +130,22 @@ public class VenueDetailFragment extends Fragment{
 			TextView mVenueAddressText = (TextView) getActivity().findViewById(R.id.venue_detail_address_text);
 			mVenueAddressText.setText(venueObj.getAddress());
 
-			ImageView mVenueImage = (ImageView)getActivity().findViewById(R.id.venue_detail_image);
+			ImageView mVenueImageView = (ImageView)getActivity().findViewById(R.id.venue_detail_image);
 
 			// Load image from web only if available if not should show the default "Not Found Image"
 			if (!venueObj.getImage_url().isEmpty()) {
-				if (mVenue_Image != null)
-					mVenueImage.setImageBitmap(mVenue_Image);
+				if (mVenueImage != null)
+					mVenueImageView.setImageBitmap(mVenueImage);
 				else{
 					// call the task that will download the Image
 					RemoteProvider remoteProvider = RemoteProvider.getInstance();
 					RemoteProvider.initRemoteProvider(context);
 					remoteProvider.downloadImageWithURL(venueObj.getImage_url());
 					// Load a temporary image
-					mVenueImage.setImageDrawable(getResources().getDrawable(R.drawable.downloadingimage));
+					mVenueImageView.setImageDrawable(getResources().getDrawable(R.drawable.downloadingimage));
 				}
 			}else{
-				mVenueImage.setImageDrawable(getResources().getDrawable(R.drawable.dummyimage));
+				mVenueImageView.setImageDrawable(getResources().getDrawable(R.drawable.dummyimage));
 			}
 
 			String venueScheduleText = "";
@@ -164,9 +174,12 @@ public class VenueDetailFragment extends Fragment{
 		}
 	}
 
+	/**
+	 * Method that updates the UI with the selected venue
+	 */
 	public void updateVenueDetail(Venue venueObj) {
-		mViewRotated = false;
-		mVenue_Image = null;
+		isViewRotated = false;
+		mVenueImage = null;
 		TextView mVenueTitleText = (TextView) getActivity().findViewById(R.id.venue_detail_title_text);
 		mVenueTitleText.setText(venueObj.getName());
 
@@ -211,17 +224,24 @@ public class VenueDetailFragment extends Fragment{
 		// update share info in the actionbar
 		updateShareInfo(venueObj);
 	}
-
+	
+	/**
+	 * Callback method that sets the image if available in the venue information
+	 * This method is called from the VenueMainActivity
+	 */
 	public void updateVenueDetailImage(Bitmap image) {
 		if (image != null){ 
-			mVenue_Image = image;
+			mVenueImage = image;
 			ImageView mVenueImage = (ImageView)getActivity().findViewById(R.id.venue_detail_image);
 			mVenueImage.setImageBitmap(image);
 		}else{
 			Message.showErrorMessageWithAlert(context, "Error", "Uppss... there was a problem downloading the image", "Close");
 		}
 	}
-
+	
+	/**
+	 * Method that updates the venue information to be share
+	 */
 	public void updateShareInfo(Venue venueObj) {
 		if	(venueObj != null) {
 			// setup the sharing
@@ -230,6 +250,9 @@ public class VenueDetailFragment extends Fragment{
 		}
 	}
 
+	/**
+	 * Method that initialize the share Intent with the venue information to be share
+	 */
 	public void shareVenue(String textToShare) {
 
 		// populate the share intent with data

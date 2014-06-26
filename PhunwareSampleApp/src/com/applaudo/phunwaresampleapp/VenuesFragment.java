@@ -21,7 +21,7 @@ import com.applaudo.phunwaresampleapp.dataaccesslayer.RemoteProvider;
 
 public class VenuesFragment extends ListFragment{
 
-	private Context context;
+	private Context mContext;
 	private static final String TAG = "VenuesFragment";
 	private static final String VENUE_LIST = "venue_list";
 	private ArrayList<Venue> mVenueList = null;
@@ -34,15 +34,15 @@ public class VenuesFragment extends ListFragment{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		context = getActivity();
+		mContext = getActivity();
 		if(savedInstanceState == null) {
-			Networking mNetworking = new Networking(context);
+			Networking mNetworking = new Networking(mContext);
 			if (mNetworking.isOnline()){
 				RemoteProvider remoteProvider = RemoteProvider.getInstance();
-				RemoteProvider.initRemoteProvider(context);
+				RemoteProvider.initRemoteProvider(mContext);
 				remoteProvider.downloadVenuesList();
 			}else{
-				Message.showErrorMessageWithAlert(context, 
+				Message.showErrorMessageWithAlert(mContext, 
 												  "Network Error", 
 												  "No internet connection avaiable, please check your network settings", 
 												  "Close");
@@ -80,18 +80,34 @@ public class VenuesFragment extends ListFragment{
 		
 	}
 	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		
+		if (mVenueList != null)
+			outState.putParcelableArrayList(VENUE_LIST, mVenueList);
+
+	}
+	
+	/**
+	 * Click listener that sends the signal to the callback method
+	 * Sends the current position selected as a parameter
+	 */
 	public void onListItemClick(ListView list, View view, int position, long id) {
 		mCallback.onVenueSelected(position);
 		getListView().setItemChecked(position, true);
 	}
 	
+	/**
+	 * Method that updates UI with the venue list downloaded from the amazon S3 bucket
+	 */
 	public void updateVenueView(ArrayList<Venue>list) {
 		if(list != null) {
 			Log.e(TAG, "Updating List");
 			setListShownNoAnimation(true);
 			mVenueList = list;
 			int layout = android.R.layout.simple_list_item_2;
-			setListAdapter(new ArrayAdapter<Venue>(context, layout, android.R.id.text1, mVenueList) {
+			setListAdapter(new ArrayAdapter<Venue>(mContext, layout, android.R.id.text1, mVenueList) {
 				@Override
 				public View getView(int position, View convertView,
 						ViewGroup parent) {
@@ -108,15 +124,9 @@ public class VenuesFragment extends ListFragment{
 		}
 	}
 	
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		
-		if (mVenueList != null)
-			outState.putParcelableArrayList(VENUE_LIST, mVenueList);
-
-	}
-	
+	/**
+	 * Method that updates the global venue list with the list downloaded from the amazon S3 bucket
+	 */
 	public void updateVenueList(ArrayList<Venue>list) {
 		mVenueList = (ArrayList<Venue>) list; 
 		updateVenueView (mVenueList);

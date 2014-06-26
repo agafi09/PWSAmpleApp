@@ -7,6 +7,7 @@ import com.applaudo.phunwaresampleapp.common.Message;
 import com.applaudo.phunwaresampleapp.dataaccesslayer.Networking;
 import com.applaudo.phunwaresampleapp.dataaccesslayer.RemoteProvider;
 import com.applaudo.phunwaresampleapp.entitylayer.ServiceActionResult;
+import com.applaudo.phunwaresampleapp.entitylayer.ServiceActionResult.ServiceActionResultCode;
 import com.applaudo.phunwaresampleapp.entitylayer.Venue;
 
 import android.support.v7.app.ActionBarActivity;
@@ -21,8 +22,8 @@ public class VenueMainActivity extends ActionBarActivity
 implements VenuesFragment.OnVenueSelectedListener, 
 		   RemoteProvider.OnContentDownloadCompletedListener{
 
-	private final static String VENUE_LIST = "venus_list";
-	private final static String DETAIL_FRAGMENT_TAG = "detail_fragment_tag";
+	private static final String VENUE_LIST = "venus_list";
+	private static final String DETAIL_FRAGMENT_TAG = "detail_fragment_tag";
 	public ArrayList<Venue> mVenueArrayList = null;
 
 	@Override
@@ -30,6 +31,7 @@ implements VenuesFragment.OnVenueSelectedListener,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.venue_main);
 
+		// creates the venue fragment and add it to the container - Phones only
 		if (findViewById(R.id.container) != null) {
 			if (savedInstanceState != null) {
 				return;
@@ -52,7 +54,22 @@ implements VenuesFragment.OnVenueSelectedListener,
 			return true;   
 		}
 	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if (mVenueArrayList != null)
+			outState.putParcelableArrayList(VENUE_LIST, mVenueArrayList);
+	}
 
+	@Override  
+	public void onRestoreInstanceState(Bundle savedInstanceState) {  
+		super.onRestoreInstanceState(savedInstanceState);  
+
+		mVenueArrayList = savedInstanceState.getParcelableArrayList(VENUE_LIST); 
+
+	}
+	
 	@Override
 	public void onVenueSelected(int position) {
 		Networking mNetworking = new Networking(this);
@@ -82,11 +99,15 @@ implements VenuesFragment.OnVenueSelectedListener,
 					"Close");
 		}
 	}
-
+	
+	/**
+	 * Callback method that it's been called after a image was downloaded
+	 * Notify the fragments in order to update the UI
+	 */
 	@Override
 	public void onContentDownloadCompletedListener(ServiceActionResult result) {
 		ArrayList<Venue> tempResult = (ArrayList<Venue>)result.getResult();
-		if (result.getReturnCode()==result.SERVICE_CODE_SUCCESS) {
+		if (result.getReturnCode()==ServiceActionResultCode.SERVICE_CODE_SUCCESS) {
 			if (tempResult != null) {
 				mVenueArrayList = tempResult;
 
@@ -125,7 +146,9 @@ implements VenuesFragment.OnVenueSelectedListener,
 		}
 	}
 
-	// Method that sets the title for the ActionBar
+	/**
+	 * Method that sets the title for the ActionBar
+	 */
 	public void setActionBarTitle(String title) {
 		final ActionBar mBar = getSupportActionBar();
 
@@ -145,6 +168,10 @@ implements VenuesFragment.OnVenueSelectedListener,
 		}
 	}
 
+	/**
+	 * Callback method that it's been called after a image was downloaded
+	 * Notify the fragments in order to update the UI
+	 */
 	@Override
 	public void onImageDownloadCompletedListener(Bitmap result) {
 
@@ -158,21 +185,6 @@ implements VenuesFragment.OnVenueSelectedListener,
 		}
 		if (mVenueDetailFragment != null)
 			mVenueDetailFragment.updateVenueDetailImage(result);
-
-	}
-
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		if (mVenueArrayList != null)
-			outState.putParcelableArrayList(VENUE_LIST, mVenueArrayList);
-	}
-
-	@Override  
-	public void onRestoreInstanceState(Bundle savedInstanceState) {  
-		super.onRestoreInstanceState(savedInstanceState);  
-
-		mVenueArrayList = savedInstanceState.getParcelableArrayList(VENUE_LIST); 
 
 	}
 

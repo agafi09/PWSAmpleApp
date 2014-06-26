@@ -7,7 +7,7 @@ public class Constants {
 		throw new AssertionError();
 	}
 	
-	/*
+	/**
 	 * TITLES FOR THE ACTION BAR
 	 */
 	public static final String ACTIONBAR_HOME_TITLE = "Phunware Sample App";

@@ -14,18 +14,34 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.applaudo.phunwaresampleapp.datalayer.Parser;
 import com.applaudo.phunwaresampleapp.entitylayer.ServiceActionResult;
+import com.applaudo.phunwaresampleapp.entitylayer.ServiceActionResult.ServiceActionResultCode;
 import com.applaudo.phunwaresampleapp.entitylayer.Venue;
 
+/**
+ * Singleton class that downloads all the content and images from the amazon S3 bucket
+ */
 public class RemoteProvider {
-	
-	protected static final String TAG = "VolleyProvider";
 	 
-	private static String URL = "https://s3.amazonaws.com/jon-hancock-phunware/nflapi-static.json";
+	private static final String URL = "https://s3.amazonaws.com/jon-hancock-phunware/nflapi-static.json";
+	
 	private static Context mContext;
+	private static RemoteProvider mInstance;
+	
 	private ServiceActionResult mSarObject;  
 	
-	private static RemoteProvider   mInstance;
+	/**
+	 * Interface that declares the callback methods that will notify the activity and fragments that implements it.	
+	 */
+	private static OnContentDownloadCompletedListener mCallback;
+	public interface OnContentDownloadCompletedListener{
+		public void onContentDownloadCompletedListener(ServiceActionResult result);
+		public void onImageDownloadCompletedListener(Bitmap result);
+	}
 	
+
+	/**
+	 * Returns a new instance or and old one if was created previously
+	 */
 	public static RemoteProvider getInstance(){
         if (mInstance == null){
         	mInstance = new RemoteProvider();
@@ -33,21 +49,17 @@ public class RemoteProvider {
         return mInstance;
     }
 	
-	private RemoteProvider(){
-    }
-	
+	/**
+	 * Method that initialize the singleton class 	
+	 */
 	public static void initRemoteProvider (Context con){
 		mContext = con;
 		mCallback = (OnContentDownloadCompletedListener) mContext;
 	}
-	   
 	
-	private static OnContentDownloadCompletedListener mCallback;
-	public interface OnContentDownloadCompletedListener{
-		public void onContentDownloadCompletedListener(ServiceActionResult result);
-		public void onImageDownloadCompletedListener(Bitmap result);
-	}
-	
+	/**
+	 * Method that downloads the JSON content from the amazon S3 bucket
+	 */
 	public void downloadVenuesList(){
 	         
 		// Create a single queue
@@ -65,11 +77,11 @@ public class RemoteProvider {
             		if (loObject != null) {
             			mSarObject.setResult(loObject);
             			mSarObject.setMessage("Success");
-            			mSarObject.setReturnCode(mSarObject.SERVICE_CODE_SUCCESS);
+            			mSarObject.setReturnCode(ServiceActionResultCode.SERVICE_CODE_SUCCESS);
             		} else {
             			mSarObject.setResult(null);
             			mSarObject.setMessage("Failed");
-            			mSarObject.setReturnCode(mSarObject.SERVICE_CODE_FAILURE);
+            			mSarObject.setReturnCode(ServiceActionResultCode.SERVICE_CODE_FAILURE);
             		}
             		
             		mCallback.onContentDownloadCompletedListener(mSarObject);
@@ -83,7 +95,7 @@ public class RemoteProvider {
                     mSarObject = new ServiceActionResult();
                     mSarObject.setResult(null);
         			mSarObject.setMessage(error.toString());
-        			mSarObject.setReturnCode(mSarObject.SERVICE_CODE_FAILURE);
+        			mSarObject.setReturnCode(ServiceActionResultCode.SERVICE_CODE_FAILURE);
         			mCallback.onContentDownloadCompletedListener(mSarObject);
                }
             }
@@ -92,6 +104,9 @@ public class RemoteProvider {
         queue.add(getRequest);
 	}
 	
+	/**
+	 * Method that downloads the image for a given URL
+	 */
 	public void downloadImageWithURL(String imageUrl){
         
 		// Create a single queue
